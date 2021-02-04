@@ -11,9 +11,14 @@ dotenv.config({ path: './config/config.env' });
 connectDB();
 
 // Route files coming here!!!
-const university = require('./routes/university');
-const faculty = require('./routes/faculty');
-const department = require('./routes/department');
+//const test = require('./routes/test');
+const subject = require('./routes/subject');
+const teacher = require('./routes/teacher');
+const student = require('./routes/student');
+const connection = require('./routes/connection');
+const assignment = require('./routes/assignment');
+const assignmentAnswer = require('./routes/assignmentAnswer');
+
 
 const app = express();
 
@@ -24,9 +29,14 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Mount routers here !!!
-app.use('/api/v1/university', university);
-app.use('/api/v1/faculty', faculty);
-app.use('/api/v1/department', department);
+//app.use('/api/v1/TEST', TEST);
+app.use('/api/v1/subjects', subject);
+app.use('/api/v1/teachers', teacher);
+app.use('/api/v1/students', student);
+app.use('/api/v1/connections', connection);
+app.use('/api/v1/assignments', assignment);
+app.use('/api/v1/assignmentAnswers', assignmentAnswer);
+
 
 app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
