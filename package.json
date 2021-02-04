@@ -14,7 +14,7 @@
   },
   "author": "Ensar Eray",
   "license": "MIT",
-  "homepage": "https://github.com/Museo-CMS/Museo-API#readme",
+  "homepage": "https://github.com/EnsarErayAkkaya/FlutterProject_API#readme",
   "dependencies": {
     "bcrypt": "^5.0.0",
     "dotenv": "^8.2.0",
