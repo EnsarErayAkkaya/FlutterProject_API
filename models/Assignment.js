@@ -19,7 +19,7 @@ const AssignmentSchema = new mongoose.Schema({
     },
     endDate: {
         type: Date,
-        default: (Date.now += (1 * 60 * 60 * 1000)) // add 1 hour
+        default: Date.now
     },
     createdAt: {
       type: Date,
@@ -40,5 +40,4 @@ AssignmentSchema.virtual('assignmentMarks', {
     await this.model('AssignmentAnswer').deleteMany({ assignment: this._id });
     next();
   });
-
 module.exports = mongoose.model('Assignment', AssignmentSchema);

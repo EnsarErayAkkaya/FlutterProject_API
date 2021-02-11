@@ -181,6 +181,9 @@ exports.addStudent = asyncHandler(async (req, res, next) => {
         subject.students.push(student);
         subject.save();
 
+        student.subjects.push(subject);
+        student.save();
+
         res.status(200).json({ success: true, data: subject });
     }
 });
@@ -229,6 +232,9 @@ exports.removeStudent = asyncHandler(async (req, res, next) => {
     else {
         subject.students.pull(student);
         subject.save();
+        
+        student.students.pull(subject);
+        student.save();
 
         res.status(200).json({ success: true, data: subject });
     }

@@ -33,6 +33,9 @@ app.use('/api/v1/connections', connection);
 app.use('/api/v1/assignments', assignment);
 app.use('/api/v1/assignmentAnswers', assignmentAnswer);
 
+var datetime = new Date();
+console.log(datetime);
+
 
 app.use(errorHandler);
 const PORT = process.env.PORT || 5000;

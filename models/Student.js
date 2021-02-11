@@ -32,6 +32,12 @@ const StudentSchema = new mongoose.Schema({
             ref: 'Connection'
         }
     ],
+    subjects: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Subject'
+      }
+    ],
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     createdAt: {
@@ -49,13 +55,6 @@ StudentSchema.pre('save', async function (next) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
   });
-  
-  // Sign JWT and returns
-  StudentSchema.methods.getSignedJwtToken = function () {
-    return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRE
-    });
-  };
   
   // Match user entered password to hashed password in database
   StudentSchema.methods.matchPassword = async function (enteredPassword) {

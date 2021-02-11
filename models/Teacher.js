@@ -35,9 +35,13 @@ const TeacherSchema = new mongoose.Schema({
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     createdAt: {
-        type: Date,
-        default: Date.now
+      type: Date,
+      default: Date.now
     }
+},
+{
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 // Encrypt password using bcrypt
@@ -45,19 +49,19 @@ TeacherSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
       next();
     }
-  
+    console.log('teacher schema pre save');
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
   });
-  
-  
-  // Sign JWT and returns
-  TeacherSchema.methods.getSignedJwtToken = function () {
-    return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRE
-    });
-  };
-  
+
+  //Reverse populate with virtuals
+  TeacherSchema.virtual('subjects', {
+    ref: 'Subject',
+    localField: '_id',
+    foreignField: 'teacher',
+    justOne: false
+  });
+
   // Match user entered password to hashed password in database
   TeacherSchema.methods.matchPassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);

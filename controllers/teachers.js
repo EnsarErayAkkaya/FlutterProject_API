@@ -1,8 +1,8 @@
-const Teacher = require('../models/Teacher')
 const asyncHandler = require('../middleware/async')
 const ErrorResponse = require('../utils/errorResponse');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
+const Teacher = require('../models/Teacher')
 
 // @desc        Get all Teachers
 // @route       GET api/v1/Teacher
@@ -51,7 +51,7 @@ exports.register = asyncHandler(async (req, res, next) => {
     if (!teacher) {
       return next(new ErrorResponse('Error when creating teacher', 500));
     }  
-
+    
     await teacher.save({ validateBeforeSave: false });
   
     res.status(201).json({ success: true });
@@ -90,7 +90,8 @@ exports.login = asyncHandler(async (req, res, next) => {
             "_id": teacher._id,
             "name":teacher.name,
             "surname":teacher.surname,
-            "email":teacher.email
+            "email":teacher.email,
+            "students":teacher.students
         }
       });
   });
