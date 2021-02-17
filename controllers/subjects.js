@@ -9,7 +9,7 @@ ObjectID = require('mongodb').ObjectID
 // @route       GET api/v1/subject
 // @access      Private Admin
 exports.getSubjects = asyncHandler(async (req, res, next) => {
-    const subjects = await Subject.find();
+    const subjects = await Subject.find().populate('studentsData');
   
     if (!subjects) {
       return next(new ErrorResponse('There is no subjects on Db !', 400));
@@ -71,7 +71,9 @@ exports.createSubject = asyncHandler(async (req, res, next) => {
       return next(new ErrorResponse('An error occured when creating Subject!', 400));
     }
 
-    const subject = await Subject.create(req.body);
+    const subject = await Subject.create(req.body)
+    
+    await subject.populate('assignments', '_id description fileURL startDate endDate').execPopulate();
 
     res
       .status(201)
@@ -90,12 +92,12 @@ exports.updateSubject = asyncHandler(async (req, res, next) => {
 
     const subjectTeacher = await Subject.findById(req.params.id).select('teacher');
     
-    if(teacher != subjectTeacher)
+    if(String(teacher['_id']) != String(subjectTeacher['teacher']))
     {
         return next(new ErrorResponse('You cant update this subject!', 400));
     }
 
-    const subject = await Faculty.findByIdAndUpdate(req.params.id, req.body, {
+    const subject = await Subject.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
         runValidators: true
     });
@@ -114,7 +116,7 @@ exports.updateSubject = asyncHandler(async (req, res, next) => {
 // @access      Private Admin
 exports.deleteSubject = asyncHandler(async (req, res, next) => {
 
-    const teacher = await Teacher.findById(req.body.teacher);
+    /*const teacher = await Teacher.findById(req.body.teacher);
   
     if (!teacher) {
       return next(new ErrorResponse('could not find teacher!', 400));
@@ -125,7 +127,7 @@ exports.deleteSubject = asyncHandler(async (req, res, next) => {
     if(teacher != subjectTeacher)
     {
         return next(new ErrorResponse('You cant delete this subject!', 400));
-    }
+    }*/
     
     const subject = await Subject.findByIdAndDelete(req.params.id);
   
@@ -184,7 +186,7 @@ exports.addStudent = asyncHandler(async (req, res, next) => {
         student.subjects.push(subject);
         student.save();
 
-        res.status(200).json({ success: true, data: subject });
+        res.status(200).json({ success: true, data: [] });
     }
 });
 
@@ -233,9 +235,9 @@ exports.removeStudent = asyncHandler(async (req, res, next) => {
         subject.students.pull(student);
         subject.save();
         
-        student.students.pull(subject);
+        student.subjects.pull(subject);
         student.save();
 
-        res.status(200).json({ success: true, data: subject });
+        res.status(200).json({ success: true, data: [] });
     }
 });

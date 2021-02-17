@@ -42,7 +42,6 @@ exports.createAssignment = asyncHandler(async (req, res, next) => {
     if (!subject) {
       return next(new ErrorResponse('An error occured when creating subject!', 400));
     }
-
     const assignment = await Assignment.create(req.body);
 
     res

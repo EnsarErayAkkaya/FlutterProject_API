@@ -38,21 +38,11 @@ const TeacherSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
-},
+}, 
 {
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toJSON: { virtuals: true }, // So `res.json()` and other `JSON.stringify()` functions include virtuals
+  toObject: { virtuals: true } // So `toObject()` output includes virtuals
 });
-
-// Encrypt password using bcrypt
-TeacherSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) {
-      next();
-    }
-    console.log('teacher schema pre save');
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-  });
 
   //Reverse populate with virtuals
   TeacherSchema.virtual('subjects', {
@@ -60,6 +50,19 @@ TeacherSchema.pre('save', async function (next) {
     localField: '_id',
     foreignField: 'teacher',
     justOne: false
+  });
+
+  /*TeacherSchema.pre('find', function() {
+    this.populate('subjects');
+  });*/
+
+// Encrypt password using bcrypt
+TeacherSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) {
+      next();
+    }
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
   });
 
   // Match user entered password to hashed password in database

@@ -3,7 +3,7 @@ const Teacher = require('../models/Teacher')
 const Student = require('../models/Student')
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
-ObjectID = require('mongodb').ObjectID
+var mongoose = require('mongoose');
 
 // @desc        create Connection
 // @route       POST api/v1/connections
@@ -98,12 +98,23 @@ exports.deleteConnection = asyncHandler(async (req, res, next) => {
 // @route       GET api/v1/connection/GetMyStudents/:id
 // @access      Private
 exports.GetMyStudents = asyncHandler(async (req, res, next) => {
-    const students = await Connection.find({teacher: req.params.id}).select('student');
-    //const connections = Teacher.findById(req.params.id).select('students');
+    const connections = await Connection.find({teacher: req.params.id}).select('student');
 
-    const studentIDs = students.map(ObjectId);
+    var students = connections.map(c => c.student.toString());
+    //console.log(students);
+    var result = [];
+    await Student.find({'_id': students}, function(err, docs){ 
+        if(err)
+        {
+            console.log(err.message)
+            return next(new ErrorResponse(err, 400));
+        }
+        else{
+            result.push(docs); 
+        }
+    }).select('name surname email');
 
-    const result = Student.find({ _id: { $in: studentIDs } }).select("name, surname");
+    //console.log(result);
 
     res
         .status(200)
@@ -114,11 +125,22 @@ exports.GetMyStudents = asyncHandler(async (req, res, next) => {
 // @route       GET api/v1/connection/GetMyTeachers/:id
 // @access      Private
 exports.GetMyTeachers = asyncHandler(async (req, res, next) => {
-    const teachers = await Connection.find({student: req.params.id}).select('teacher');
+    const connections = await Connection.find({student: req.params.id}).select('teacher');
 
-    const teacherIDs = teachers.map(ObjectId);
-
-    const result = Teacher.find({ _id: { $in: teacherIDs } }).select("name surname");
+    var teachers = connections.map(c => c.teacher.toString());
+    
+    //console.log(students);
+    var result = [];
+    await Teacher.find({'_id': teachers}, function(err, docs){ 
+        if(err)
+        {
+            console.log(err.message)
+            return next(new ErrorResponse(err, 400));
+        }
+        else{
+            result.push(docs); 
+        }
+    }).select('name surname email');
 
     res
         .status(200)

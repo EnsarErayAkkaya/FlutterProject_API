@@ -9,10 +9,10 @@ const {
 
 const router = express.Router();
 
-router.post(createAssignment);
+router.post('/',createAssignment);
 router.put('/:id', updateAssignment);
 router.delete('/:id', deleteAssignment);
 router.get('/:id', getAssignment);
-router.get(getAssignments);
+router.get('/', getAssignments);
 
 module.exports = router;

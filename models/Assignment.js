@@ -5,6 +5,10 @@ const AssignmentSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: 'Subject'
     },
+    title: {
+        type: String,
+        required: [true, "Please add a title"],
+    },
     description: {
         type: String,
         required: [true, "Please explain assignment"]
@@ -19,7 +23,7 @@ const AssignmentSchema = new mongoose.Schema({
     },
     endDate: {
         type: Date,
-        default: Date.now
+        default: () => new Date(+new Date() + 60*60*1000)
     },
     createdAt: {
       type: Date,
@@ -40,4 +44,10 @@ AssignmentSchema.virtual('assignmentMarks', {
     await this.model('AssignmentAnswer').deleteMany({ assignment: this._id });
     next();
   });
+
+  var minuteFromNow = function(){
+    var timeObject = new Date();
+    timeObject.setTime(timeObject.getTime() + 1000 * 60);
+    return timeObject;
+};
 module.exports = mongoose.model('Assignment', AssignmentSchema);

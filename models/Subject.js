@@ -33,6 +33,12 @@ SubjectSchema.virtual('assignments', {
     foreignField: 'subject',
     justOne: false
   });
+  /*SubjectSchema.virtual('students', {
+    ref: 'Student',
+    localField: 'students',
+    foreignField: '_id',
+    justOne: false
+  });*/
 
   //Cascade delete projects when a user deleted
   SubjectSchema.pre('remove', async function (next) {

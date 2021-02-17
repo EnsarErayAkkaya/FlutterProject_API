@@ -3,6 +3,9 @@ const ErrorResponse = require('../utils/errorResponse');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
 const Teacher = require('../models/Teacher')
+const Student = require('../models/Student')
+const Subject = require('../models/Subject')
+const Connection = require('../models/Connection')
 
 // @desc        Get all Teachers
 // @route       GET api/v1/Teacher
@@ -71,7 +74,17 @@ exports.login = asyncHandler(async (req, res, next) => {
     // Check for teacher
     const teacher = await Teacher.findOne({
       email
-    }).select('+password');
+    }).select('+password')
+      .populate(
+        {
+          path: 'subjects',
+          select: '_id name surname students',
+          populate:{ 
+              path: 'assignments',
+              select: '_id title description fileURL startDate endDate'
+            }
+          }
+        );
   
     if (!teacher) {
       return next(new ErrorResponse('Invalid credentials', 401));
@@ -83,7 +96,10 @@ exports.login = asyncHandler(async (req, res, next) => {
     if (!isMatch) {
       return next(new ErrorResponse('Invalid credentials', 401));
     }
-    
+    //console.log(teacher);
+
+    var students = await getMyStudents(teacher._id);
+
     res.status(200).json({
         success: true,
         data:{
@@ -91,7 +107,8 @@ exports.login = asyncHandler(async (req, res, next) => {
             "name":teacher.name,
             "surname":teacher.surname,
             "email":teacher.email,
-            "students":teacher.students
+            "students":students[0],
+            "subjects": teacher.subjects
         }
       });
   });
@@ -204,4 +221,25 @@ exports.updateDetails = asyncHandler(async (req, res, next) => {
       data: teacher
     });
   });
-  
+
+  getMyStudents = async (teacherid) => {
+    const connections = await Connection.find({teacher: teacherid}).select('student');
+
+    //console.log(students);
+    var students = connections.map(c => c.student.toString());
+    //console.log(students)
+
+    //console.log(students);
+    var result= [];
+    await Student.find({'_id': students}, function(err, docs){ 
+        if(err)
+        {
+            console.log(err.message)
+            return next(new ErrorResponse(err, 400));
+        }
+        else{
+            result.push(docs); 
+        }
+    }).select('name surname email');
+    return result;
+  };  
