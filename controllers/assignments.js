@@ -2,6 +2,7 @@ const Assignment = require('../models/Assignment')
 const Subject = require('../models/Subject')
 const Teacher = require('../models/Teacher')
 const asyncHandler = require('../middleware/async')
+const ErrorResponse = require('../utils/errorResponse');
 
 // @desc        Get all assignments
 // @route       GET api/v1/assignment
@@ -22,31 +23,32 @@ exports.getAssignments = asyncHandler(async (req, res, next) => {
 // @route       GET api/v1/assignment
 // @access      Private
 exports.getAssignment = asyncHandler(async (req, res, next) => {
-    const assignment = await Assignment.findById(req.params.id);
-  
-    if (!assignment) {
-      return next(new ErrorResponse('There is no assignment with given id!', 400));
-    }
-  
-    res
-      .status(200)
-      .json({ success: true, data: assignment });
+  const assignment = await Assignment.findById(req.params.id);
+
+  if (!assignment) {
+    return next(new ErrorResponse('There is no assignment with given id!', 400));
+  }
+
+  res
+    .status(200)
+    .json({ success: true, data: assignment});
 });
 
 // @desc        create assignments
 // @route       POST api/v1/assignment
 // @access      Private Admin
 exports.createAssignment = asyncHandler(async (req, res, next) => {
-    const subject = await Subject.findById(req.body.subject);
+  console.log('file: '+ req.file.originalname); 
+  /* const subject = await Subject.findById(req.body.subject);
   
     if (!subject) {
-      return next(new ErrorResponse('An error occured when creating subject!', 400));
+      return next(new ErrorResponse('An error occured when creating Assignment!', 400));
     }
-    const assignment = await Assignment.create(req.body);
+    const assignment = await Assignment.create(req.body);*/
 
     res
       .status(201)
-      .json({ success: true, data: assignment});
+      .json({ success: true/*, data: assignment*/});
 });
 
 // @desc        update assignments

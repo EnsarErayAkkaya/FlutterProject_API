@@ -2,12 +2,14 @@ const express = require('express');
 const dotenv = require('dotenv');
 const errorHandler = require('./middleware/error');
 const connectDB = require('./config/db');
+const bodyParser = require('body-parser');
 
 // Load env vars
 dotenv.config({ path: './config/config.env' });
 
 // Connect to database
-connectDB();
+global.gfs = connectDB();
+
 
 // Route files coming here!!!
 //const test = require('./routes/test');
@@ -22,7 +24,7 @@ const assignmentAnswer = require('./routes/assignmentAnswer');
 const app = express();
 
 // Body parser
-app.use(express.json());
+app.use(bodyParser.json());
 
 // Mount routers here !!!
 //app.use('/api/v1/TEST', TEST);
@@ -32,10 +34,6 @@ app.use('/api/v1/students', student);
 app.use('/api/v1/connections', connection);
 app.use('/api/v1/assignments', assignment);
 app.use('/api/v1/assignmentAnswers', assignmentAnswer);
-
-var datetime = new Date();
-console.log(datetime);
-
 
 app.use(errorHandler);
 const PORT = process.env.PORT || 5000;

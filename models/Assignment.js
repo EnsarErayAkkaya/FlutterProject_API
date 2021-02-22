@@ -13,9 +13,9 @@ const AssignmentSchema = new mongoose.Schema({
         type: String,
         required: [true, "Please explain assignment"]
     },
-    fileURL: {
+    fileId: {
         type: String,
-        required: [true, 'Insert a file link']
+        required: [false, 'Insert a file link']
     },
     startDate: {
         type: Date,
