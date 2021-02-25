@@ -81,7 +81,7 @@ exports.login = asyncHandler(async (req, res, next) => {
           select: '_id name surname students',
           populate:{ 
               path: 'assignments',
-              select: '_id title description fileURL startDate endDate'
+              select: '_id title description file startDate endDate'
             }
           }
         );

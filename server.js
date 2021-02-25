@@ -1,15 +1,17 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const errorHandler = require('./middleware/error');
-const connectDB = require('./config/db');
+const {
+  connectDB
+} = require('./config/db');
 const bodyParser = require('body-parser');
 
 // Load env vars
 dotenv.config({ path: './config/config.env' });
 
 // Connect to database
-global.gfs = connectDB();
 
+connectDB();
 
 // Route files coming here!!!
 //const test = require('./routes/test');
