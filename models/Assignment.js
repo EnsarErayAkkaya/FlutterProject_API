@@ -24,6 +24,7 @@ const AssignmentSchema = new mongoose.Schema({
     endDate: {
         type: Date,
         default: () => new Date(+new Date() + 60*60*1000)
+        
     },
     createdAt: {
       type: Date,

@@ -1,5 +1,6 @@
 const express = require('express');
 const {
+  getStudentsByName,
   getStudents,
   getStudent,
   register,
@@ -17,6 +18,8 @@ const advancedResults = require('../middleware/advancedResults');
 router
   .route('/')
   .get(getStudents, advancedResults(Student))
+
+router.get('/byName', getStudentsByName);
 
 router
   .route('/:id')

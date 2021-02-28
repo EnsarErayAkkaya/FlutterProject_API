@@ -9,19 +9,23 @@ const AssignmentAnswerSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         required: 'Student'
     },
-    answerFileURL: {
-        type: String,
-        required: [true, 'Insert a file link']
+    answerFile: {
+        type: mongoose.Schema.ObjectId,
+        required: [true, 'Insert a file id']
     },
     mark: {
-        type: String,
+        type: Number,
+        default: 0,
         required: true
     },
     markDescription: {
         type: String,
         required: false
     },
-    checked: Boolean,
+    checked: {
+        type: Boolean,
+        default: false,
+    },
     createdAt: {
       type: Date,
       default: Date.now

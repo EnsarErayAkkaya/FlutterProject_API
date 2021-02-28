@@ -72,7 +72,12 @@ exports.studentAnswerConnectionRequest = asyncHandler(async (req, res, next) => 
 // @route       DELETE api/v1/connection/:id
 // @access      Private
 exports.deleteConnection = asyncHandler(async (req, res, next) => {
-    const connection = await Connection.findById(req.params.id);
+    const connection = await Connection.findById(
+        {
+            teacher: req.body.teacher,
+            student: req.body.student,
+        }
+    );
 
     if(!connection)
     {

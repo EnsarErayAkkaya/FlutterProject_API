@@ -223,7 +223,11 @@ exports.updateDetails = asyncHandler(async (req, res, next) => {
   });
 
   getMyStudents = async (teacherid) => {
-    const connections = await Connection.find({teacher: teacherid}).select('student');
+    const connections = await Connection.find(
+      {
+        teacher: teacherid,
+        studentAns: 'Accepted'
+      }).select('student');
 
     //console.log(students);
     var students = connections.map(c => c.student.toString());

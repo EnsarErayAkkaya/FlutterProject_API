@@ -8,15 +8,37 @@ const sendEmail = require('../utils/sendEmail');
 // @route       GET api/v1/Student
 // @access      Private Admin
 exports.getStudents = asyncHandler(async (req, res, next) => {
-    const Students = await Student.find();
+    const students = await Student.find();
   
-    if (!Students) {
+    if (!students) {
       return next(new ErrorResponse('There is no Student on Db !', 400));
     }
   
     res
       .status(200)
-      .json({ success: true, count: Students.length, data: Students });
+      .json({ success: true, count: students.length, data: students });
+});
+
+// @desc        Get all Students by name
+// @route       GET api/v1/Student/:name
+// @access      Private Admin
+exports.getStudentsByName = asyncHandler(async (req, res, next) => {
+    //console.log(req.body);
+    const regexName = new RegExp(`\\\w*${req.body.name}\\\w*`, 'i');
+    const regexSurname = new RegExp(`\\\w*${req.body.surname}\\\w*`, 'i');
+    
+    const students = await Student.find(
+      { name: regexName, surname: regexSurname },
+      'name surname email'
+    ).exec();
+  
+    if (!students) {
+      return next(new ErrorResponse('There is no Student on Db !', 400));
+    }
+  
+    res
+      .status(200)
+      .json({ success: true, count: students.length, data: students });
 });
 
 // @desc        Get Student
