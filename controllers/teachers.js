@@ -78,7 +78,7 @@ exports.login = asyncHandler(async (req, res, next) => {
       .populate(
         {
           path: 'subjects',
-          select: '_id name surname students',
+          select: '_id name students',
           populate:{ 
               path: 'assignments',
               select: '_id title description file startDate endDate'

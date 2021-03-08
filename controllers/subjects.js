@@ -24,7 +24,11 @@ exports.getSubjects = asyncHandler(async (req, res, next) => {
 // @route       GET api/v1/subject/teacherSubjects/:id
 // @access      Private 
 exports.getTeachersSubjects = asyncHandler(async (req, res, next) => {
-    const subjects = await Subject.find({teacher: req.params.id});
+    const subjects = await Subject.find({teacher: req.params.id})
+      .populate({
+        path: 'assignments',
+        select: '_id title description file startDate endDate'
+      });
   
     if (!subjects) {
       return next(new ErrorResponse('There is no subjects on Db !', 400));
@@ -32,8 +36,9 @@ exports.getTeachersSubjects = asyncHandler(async (req, res, next) => {
   
     res
       .status(200)
-      .json({ success: true, count: subjects.length, data: subjects });
+      .json({ success: true, data: subjects });
 });
+
 
 // @desc        Get subject
 // @route       GET api/v1/subject
@@ -221,6 +226,41 @@ exports.removeStudent = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse('You cant remove student from this subject!', 400));
     }
     
+    //look if this student exist in this subject
+    var found = false;
+    for (const index in subject.students) {  
+        if(String(student['_id']) == String(subject.students[index])){
+            found = true;
+            break;
+        }
+    };
+
+    if(!found) {
+        return next(new ErrorResponse('This student not exist in this subject!', 400));
+    }
+    else {
+        subject.students.pull(student);
+        subject.save();
+        
+        student.subjects.pull(subject);
+        student.save();
+
+        res.status(200).json({ success: true, data: [] });
+    }
+});
+
+// @desc        Student Leave Subject
+// @route       POST api/v1/subject/leave
+// @access      Private Student 
+exports.leaveSubject = asyncHandler((req, res, next) => {
+    const student = Student.find(req.body.student);
+    const subject = Subject.find(req.body.subject);
+    
+    if(!student || !subject){
+        return next(new ErrorResponse('An Error occured when leaving subject!', 400));
+    }
+
+    //look if this student exist in this subject
     var found = false;
     for (const index in subject.students) {  
         if(String(student['_id']) == String(subject.students[index])){
@@ -240,4 +280,5 @@ exports.removeStudent = asyncHandler(async (req, res, next) => {
 
         res.status(200).json({ success: true, data: [] });
     }
+    
 });

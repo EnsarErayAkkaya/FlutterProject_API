@@ -13,7 +13,7 @@ const Connection = require('../models/Connection');
 
 router.post('/createConnection', createConnection);
 router.post('/answerConnectionRequest/:id', studentAnswerConnectionRequest);
-router.delete('/:id', deleteConnection);
+router.delete('/', deleteConnection);
 router.get('/getStudents/:id', GetMyStudents);
 router.get('/getTeachers/:id', GetMyTeachers);
 

@@ -1,4 +1,6 @@
 const Student = require('../models/Student')
+const Connection = require('../models/Connection')
+const Teacher = require('../models/Teacher')
 const asyncHandler = require('../middleware/async')
 const ErrorResponse = require('../utils/errorResponse');
 const crypto = require('crypto');
@@ -93,7 +95,17 @@ exports.login = asyncHandler(async (req, res, next) => {
     // Check for student
     const student = await Student.findOne({
       email
-    }).select('+password');
+    }).select('+password')
+      .populate(
+        {
+          path: 'subjects',
+          select: '_id name teacher',
+          populate:{ 
+              path: 'assignments',
+              select: '_id title description file startDate endDate'
+            }
+        }
+      );
   
     if (!student) {
       return next(new ErrorResponse('Invalid credentials', 401));
@@ -105,6 +117,16 @@ exports.login = asyncHandler(async (req, res, next) => {
     if (!isMatch) {
       return next(new ErrorResponse('Invalid credentials', 401));
     }
+
+    var teachers = await Connection.find({
+        student : student._id
+      })
+        .select('teacher studentAns')
+        .populate({
+          path: 'teacher',
+          select: 'name surname email',
+        });
+        
   
     res.status(200).json({
         success: true,
@@ -112,7 +134,9 @@ exports.login = asyncHandler(async (req, res, next) => {
             "_id": student._id,
             "name":student.name,
             "surname":student.surname,
-            "email":student.email
+            "email":student.email,
+            "subjects":student.subjects,
+            "teachers":teachers
         }
       });
   });
@@ -225,4 +249,27 @@ exports.updateDetails = asyncHandler(async (req, res, next) => {
       data: student
     });
   });
-  
+  getMyTeachers = async (studentId) => {
+    const connections = await Connection.find(
+      {
+        student: studentId,
+      }).select('teacher studentAns');
+
+    //console.log(students);
+    var teachers = connections.map(c => c.teacher.toString());
+    //console.log(students)
+
+    //console.log(students);
+    var result= [];
+    await Teacher.find({'_id': teachers}, function(err, docs){ 
+        if(err)
+        {
+            console.log(err.message)
+            return next(new ErrorResponse(err, 400));
+        }
+        else{
+            result.push(docs); 
+        }
+    }).select('name surname email');
+    return result;
+  };

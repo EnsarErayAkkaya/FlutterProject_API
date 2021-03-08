@@ -7,7 +7,8 @@ const {
   updateSubject,
   deleteSubject,
   addStudent,
-  removeStudent
+  removeStudent,
+  leaveSubject
 } = require('../controllers/subjects');
 
 const router = express.Router();
@@ -33,6 +34,10 @@ router
 router
   .route('/removeStudent')
   .post(removeStudent);
+
+router
+  .route('/leave')
+  .post(leaveSubject);
 
 router
     .route('/teacherSubjects/:id')

@@ -12,13 +12,25 @@ exports.createConnection = asyncHandler(async (req, res, next) => {
     const teacher = await Teacher.findById(req.body.teacher);
   
     if (!teacher) {
-      return next(new ErrorResponse('An error occured when creating connection!', 400));
+      return next(new ErrorResponse('Teacher not found! An error occured when creating connection!', 400));
     }
     
     const student = await Student.findById(req.body.student);
   
     if (!student) {
-      return next(new ErrorResponse('An error occured when creating connection!', 400));
+      return next(new ErrorResponse('Student not found! An error occured when creating connection!', 400));
+    }
+
+    const conn = await Connection.findOne(
+        {
+            teacher: req.body.teacher,
+            student: req.body.student,
+        }
+    );
+
+    if(conn)
+    {
+        return next(new ErrorResponse('Connection already created', 400));
     }
 
     const connection = await Connection.create(req.body);
@@ -50,9 +62,18 @@ exports.studentAnswerConnectionRequest = asyncHandler(async (req, res, next) => 
         teacher.save();
         student.save();
 
+        const connections = await Connection.find({
+            student : student._id
+        })
+        .select('teacher studentAns')
+        .populate({
+            path: 'teacher',
+            select: 'name surname email',
+        });
+
         res
             .status(200)
-            .json({ success: true});
+            .json({ success: true, data: connections});
     }
     else {
         // delete connection rejected
@@ -62,9 +83,18 @@ exports.studentAnswerConnectionRequest = asyncHandler(async (req, res, next) => 
             return next(new ErrorResponse('An error occured when deleting request!', 400));
         }
 
+        const connections = await Connection.find({
+                student : connection.student
+        })
+        .select('teacher studentAns')
+        .populate({
+            path: 'teacher',
+            select: 'name surname email',
+        });
+
         res
             .status(200)
-            .json({ success: false});
+            .json({ success: true, data: connections});
     }
 });
 
@@ -72,12 +102,13 @@ exports.studentAnswerConnectionRequest = asyncHandler(async (req, res, next) => 
 // @route       DELETE api/v1/connection/:id
 // @access      Private
 exports.deleteConnection = asyncHandler(async (req, res, next) => {
-    const connection = await Connection.findById(
+    const connection = await Connection.findOne(
         {
             teacher: req.body.teacher,
             student: req.body.student,
         }
     );
+    console.log(connection);
 
     if(!connection)
     {
@@ -87,12 +118,21 @@ exports.deleteConnection = asyncHandler(async (req, res, next) => {
     const teacher = await Teacher.findById(connection.teacher);
     const student = await Student.findById(connection.student);
 
+    
+    console.log(teacher);
+    console.log(student);
+
     teacher.students.pull(connection);
     student.teachers.pull(connection);
     teacher.save();
     student.save();
     
-    await Connection.findByIdAndDelete(req.params.id);
+    var res = await Connection.findByIdAndDelete(connection._id);
+    if(!res)
+    {
+        return next(new ErrorResponse('An error occured when deleting request!', 400));
+    }
+    console.log('connection deleted');
 
     res
         .status(200)
@@ -100,10 +140,10 @@ exports.deleteConnection = asyncHandler(async (req, res, next) => {
 });
 
 // @desc        Get Teachers Students
-// @route       GET api/v1/connection/GetMyStudents/:id
+// @route       GET api/v1/connection/GetStudents/:id
 // @access      Private
 exports.GetMyStudents = asyncHandler(async (req, res, next) => {
-    const connections = await Connection.find({teacher: req.params.id}).select('student');
+    /*const connections = await Connection.find({teacher: req.params.id}).select('student');
 
     var students = connections.map(c => c.student.toString());
     //console.log(students);
@@ -117,37 +157,60 @@ exports.GetMyStudents = asyncHandler(async (req, res, next) => {
         else{
             result.push(docs); 
         }
-    }).select('name surname email');
+    }).select('name surname email');*/
 
-    //console.log(result);
+    const connections = await Connection.find({
+        teacher : req.params.id
+      })
+        .select('student')
+        .populate({
+          path: 'student',
+          select: 'name surname email',
+        });
+    let students = [];
+    connections.map((c) => {
+        students.push(c.student);
+    });
 
     res
         .status(200)
-        .json({ success: true, count: result.count, data: result});
+        .json({ success: true, data: students});
 });
 
 // @desc        Get Students Teachers
 // @route       GET api/v1/connection/GetMyTeachers/:id
 // @access      Private
 exports.GetMyTeachers = asyncHandler(async (req, res, next) => {
-    const connections = await Connection.find({student: req.params.id}).select('teacher');
-
-    var teachers = connections.map(c => c.teacher.toString());
-    
-    //console.log(students);
-    var result = [];
-    await Teacher.find({'_id': teachers}, function(err, docs){ 
-        if(err)
-        {
-            console.log(err.message)
-            return next(new ErrorResponse(err, 400));
-        }
-        else{
-            result.push(docs); 
-        }
-    }).select('name surname email');
+    const connections = await Connection.find({
+        student : req.params.id
+      })
+        .select('teacher studentAns')
+        .populate({
+          path: 'teacher',
+          select: 'name surname email',
+        });
 
     res
         .status(200)
-        .json({ success: true,  count: result.count, data: result});
+        .json({ success: true, data: connections});
 });
+
+/*
+// @desc        Get Students Teachers
+// @route       GET api/v1/connection/myConnectionRequests/:id
+// @access      Private
+exports.GetMyConnectionRequests = asyncHandler(async (req, res, next) => {
+    const connections = await Connection.find(
+        {
+            student: req.params.id,
+            studentAns: ''
+        }
+    ).select('teacher');
+    if(!connections){
+        return next(new ErrorResponse('An error occured when getting connections!', 400));
+    }
+
+    res
+        .status(200)
+        .json({ success: true,  count: connections.count, data: connections});
+});*/
