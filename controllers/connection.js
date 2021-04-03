@@ -181,6 +181,7 @@ exports.GetMyStudents = asyncHandler(async (req, res, next) => {
 // @route       GET api/v1/connection/GetMyTeachers/:id
 // @access      Private
 exports.GetMyTeachers = asyncHandler(async (req, res, next) => {
+    console.log("fetch connections");
     const connections = await Connection.find({
         student : req.params.id
       })

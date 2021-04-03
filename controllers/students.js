@@ -273,3 +273,26 @@ exports.updateDetails = asyncHandler(async (req, res, next) => {
     }).select('name surname email');
     return result;
   };
+  // @desc      fetch subjects
+  // @route     PUT /api/v1/students/subjects/:id
+  // @access    Private
+exports.getSubjects = asyncHandler(async (req, res, next) => {
+  const subjects = await Student.findById(req.params.id)
+    .select('subjects')
+    .populate({
+      path: 'subjects',
+      select: '_id name teacher',
+      populate:{ 
+          path: 'assignments',
+          select: '_id title description file startDate endDate'
+        }
+    });
+    if(!subjects){
+      return next(new ErrorResponse('Error while fetching subjects', 404));
+    }
+
+  res.status(200).json({
+    success: true,
+    data: subjects.subjects
+  });
+});

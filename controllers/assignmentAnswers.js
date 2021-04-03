@@ -43,19 +43,12 @@ exports.getAssignmentAnswer = asyncHandler(async (req, res, next) => {
 // @access      Private student
 exports.createAssignmentAnswer = asyncHandler(async (req, res, next) => {
     const assignment = await Assignment.findById(req.body.assignment);
-    const gfs = getGFS();
-    if (!assignment) {
-        gfs.remove({_id: req.file.id, root: 'uploads'}, (err, gridStore) => {
-            if(err){
-                return next(new ErrorResponse('error when deleting old file!', 400));
-            }
-        });
-      return next(new ErrorResponse('An error occured when creating AssignmentAnswer!', 400));
-    }
     const student = await Student.findById(req.body.student);
+    
+    const gfs = getGFS();
   
-    if (!student) {
-      	gfs.remove({_id: req.file.id, root: 'uploads'}, (err, gridStore) => {
+    if (!student || !assignment) {
+      	gfs.remove({filename: req.file.filename, root: 'uploads'}, (err, gridStore) => {
             if(err){
                 return next(new ErrorResponse('error when deleting old file!', 400));
             }
@@ -63,8 +56,8 @@ exports.createAssignmentAnswer = asyncHandler(async (req, res, next) => {
 		return next(new ErrorResponse('An error occured when creating AssignmentAnswer!', 400));
     }
 
-    console.log('file: '+ req.file.id);
-    req.body.file =  req.file.id;
+    console.log('file: '+ req.file.filename);
+    req.body.file =  req.file.filename;
 
     const assignmentAnswer = await AssignmentAnswer.create(req.body);
 
@@ -81,7 +74,7 @@ exports.updateAssignmentAnswer = asyncHandler(async (req, res, next) => {
     console.log('AssignmentAnswer Update');
     if(req.file != null){
         console.log('Have a new file');
-        req.body.file = req.file.id; 
+        req.body.file = req.file.filename; 
     }
 
     const assignmentAnswerOld = await AssignmentAnswer.findById(req.params.id);
@@ -93,7 +86,7 @@ exports.updateAssignmentAnswer = asyncHandler(async (req, res, next) => {
     if(!assignmentAnswer){
         if(req.file != null){
             console.log('Couldnt update assignment deleting new uploaded file');
-            gfs.remove({_id: req.file._id, root: 'uploads'}, (err, gridStore) => {
+            gfs.remove({filename: req.file.filename, root: 'uploads'}, (err, gridStore) => {
                 if(err){
                     return next(new ErrorResponse('error when deleting new file!', 400));
                 }
@@ -103,9 +96,9 @@ exports.updateAssignmentAnswer = asyncHandler(async (req, res, next) => {
     }
 
 	if(req.file != null){
-		if(assignmentOld.file != null && assignmentOld.file != ''){
+		if(assignmentAnswerOld.file != null && assignmentAnswerOld.file != ''){
 		  	console.log('Updated assignment deleting old file');
-		  	gfs.remove({_id: assignmentAnswerOld.file, root: 'uploads'}, (err, gridStore) => {
+		  	gfs.remove({filename: assignmentAnswerOld.file, root: 'uploads'}, (err, gridStore) => {
 			  	if(err){
 					return next(new ErrorResponse('error when deleting old file!', 400));
 			  	}
@@ -115,14 +108,14 @@ exports.updateAssignmentAnswer = asyncHandler(async (req, res, next) => {
 
     res
       .status(200)
-      .json({ success: true, data: assignment});
+      .json({ success: true, data: assignmentAnswer});
 });
 
 // @desc        Delete AssignmentAnswer
 // @route       DELETE api/v1/assignment/:id
 // @access      Private Admin
 exports.deleteAssignmentAnswer = asyncHandler(async (req, res, next) => {
-	const gfs = getGFS();
+    const gfs = getGFS();
   	console.log('delete assignment Answer: ' + gfs);
 
     const assignmentAnswer = await AssignmentAnswer.findByIdAndDelete(req.params.id);
@@ -133,11 +126,11 @@ exports.deleteAssignmentAnswer = asyncHandler(async (req, res, next) => {
       );
     }
 
-	gfs.remove({_id: assignment.file, root: 'uploads'}, (err, gridStore) => {
-		if(err){
-		  return next(new ErrorResponse('error when deleting old file!', 400));
-		}
-	});		
+    gfs.remove({filename: assignment.file, root: 'uploads'}, (err, gridStore) => {
+      if(err){
+        return next(new ErrorResponse('error when deleting old file!', 400));
+      }
+    });		
 
     res.status(200).json({ success: true, data: {} });
 });

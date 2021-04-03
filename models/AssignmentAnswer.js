@@ -10,8 +10,8 @@ const AssignmentAnswerSchema = new mongoose.Schema({
         required: 'Student'
     },
     answerFile: {
-        type: mongoose.Schema.ObjectId,
-        required: [true, 'Insert a file id']
+        type: String,
+        required: [true, 'Insert a filename']
     },
     mark: {
         type: Number,

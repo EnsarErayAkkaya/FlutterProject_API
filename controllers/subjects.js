@@ -45,6 +45,7 @@ exports.getTeachersSubjects = asyncHandler(async (req, res, next) => {
 // @access      Private
 exports.getSubject = asyncHandler(async (req, res, next) => {
     const teacher = await Teacher.findById(req.params.id);
+    console.log("fetching..");
   
     if (!teacher) {
       return next(new ErrorResponse('could not find teacher!', 400));
