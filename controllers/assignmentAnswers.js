@@ -8,7 +8,7 @@ const {
 } = require('../config/db');
 
 // @desc        Get all AssignmentAnswers
-// @route       GET api/v1/assignment
+// @route       GET api/v1/assignmentAnswers
 // @access      Private Admin
 exports.getAssignmentAnswers = asyncHandler(async (req, res, next) => {
     const assignmentAnswers = await AssignmentAnswer.find();
@@ -24,7 +24,7 @@ exports.getAssignmentAnswers = asyncHandler(async (req, res, next) => {
 
 
 // @desc        Get all AssignmentAnswers
-// @route       GET api/v1/assignment
+// @route       GET api/v1/assignmentAnswers
 // @access      Private Admin
 exports.getAssignmentAnswer = asyncHandler(async (req, res, next) => {
     const assignmentAnswer = await AssignmentAnswer.findById(req.params.id);
@@ -39,13 +39,14 @@ exports.getAssignmentAnswer = asyncHandler(async (req, res, next) => {
 });
 
 // @desc        create AssignmentAnswers
-// @route       POST api/v1/assignment
+// @route       POST api/v1/assignmentAnswers
 // @access      Private student
 exports.createAssignmentAnswer = asyncHandler(async (req, res, next) => {
     const assignment = await Assignment.findById(req.body.assignment);
     const student = await Student.findById(req.body.student);
     
     const gfs = getGFS();
+    console.log("create answer");
   
     if (!student || !assignment) {
       	gfs.remove({filename: req.file.filename, root: 'uploads'}, (err, gridStore) => {
@@ -57,7 +58,7 @@ exports.createAssignmentAnswer = asyncHandler(async (req, res, next) => {
     }
 
     console.log('file: '+ req.file.filename);
-    req.body.file =  req.file.filename;
+    req.body.answerFile =  req.file.filename;
 
     const assignmentAnswer = await AssignmentAnswer.create(req.body);
 
@@ -67,7 +68,7 @@ exports.createAssignmentAnswer = asyncHandler(async (req, res, next) => {
 });
 
 // @desc        update AssignmentAnswers
-// @route       PUT api/v1/assignment
+// @route       PUT api/v1/assignmentAnswers
 // @access      Private student
 exports.updateAssignmentAnswer = asyncHandler(async (req, res, next) => {
     const gfs = getGFS();
@@ -112,7 +113,7 @@ exports.updateAssignmentAnswer = asyncHandler(async (req, res, next) => {
 });
 
 // @desc        Delete AssignmentAnswer
-// @route       DELETE api/v1/assignment/:id
+// @route       DELETE api/v1/assignmentAnswers/:id
 // @access      Private Admin
 exports.deleteAssignmentAnswer = asyncHandler(async (req, res, next) => {
     const gfs = getGFS();
@@ -136,7 +137,7 @@ exports.deleteAssignmentAnswer = asyncHandler(async (req, res, next) => {
 });
 
 // @desc        Check AssignmentAnswer
-// @route       PUT api/v1/assignment/:id
+// @route       PUT api/v1/assignmentAnswers/:id
 // @access      Private
 exports.checkAssignmentAnswer = asyncHandler(async (req, res, next) => {
     const assignmentAnswer = await AssignmentAnswer.findByIdAndUpdate(req.params.id, req.body, {
@@ -147,4 +148,37 @@ exports.checkAssignmentAnswer = asyncHandler(async (req, res, next) => {
     res
       .status(200)
       .json({ success: true, data: assignmentAnswer});
+});
+
+// @desc        Download Assignment file
+// @route       GET api/v1/assignmentAnswers/downlad/:id
+// @access      Private
+exports.downloadAssignmentAnswer = asyncHandler(async (req, res, next) => {
+  const gfs = getGFS();
+  console.log("download assignment with filename: " + req.params.filename);
+
+  gfs.findOne({ filename: req.params.filename, root: 'uploads' }, function (err, file) {
+      console.log("file found");
+      if (err) {
+          return res.status(400).send(err);
+      }
+      else if (!file) {
+          console.log('Error on the database looking for the file.')
+          return res.status(404).send('Error on the database looking for the file.');
+      }
+      console.log("continue downloading");
+      res.set('Content-Type', file.contentType);
+      res.set('Content-Disposition', 'attachment; filename="' + file.filename + '"');
+
+      var readstream = gfs.createReadStream({
+          filename: req.params.filename,
+          root: 'uploads'
+      });
+
+      readstream.on("error", function (err) {
+          res.end();
+      });
+      console.log("pipe");
+      readstream.pipe(res);
+  });
 });

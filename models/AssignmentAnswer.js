@@ -18,10 +18,6 @@ const AssignmentAnswerSchema = new mongoose.Schema({
         default: 0,
         required: true
     },
-    markDescription: {
-        type: String,
-        required: false
-    },
     checked: {
         type: Boolean,
         default: false,

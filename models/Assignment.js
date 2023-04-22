@@ -30,11 +30,16 @@ const AssignmentSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
-});
+},
+{
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+}
+);
 
 //Reverse populate with virtuals
-AssignmentSchema.virtual('assignmentMarks', {
-    ref: 'AssignmentMark',
+AssignmentSchema.virtual('assignmentAnswers', {
+    ref: 'AssignmentAnswer',
     localField: '_id',
     foreignField: 'assignment',
     justOne: false

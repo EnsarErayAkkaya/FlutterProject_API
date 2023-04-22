@@ -25,10 +25,17 @@ exports.getSubjects = asyncHandler(async (req, res, next) => {
 // @access      Private 
 exports.getTeachersSubjects = asyncHandler(async (req, res, next) => {
     const subjects = await Subject.find({teacher: req.params.id})
-      .populate({
+      .populate(
+      {
         path: 'assignments',
-        select: '_id title description file startDate endDate'
-      });
+        select: '_id title description file startDate endDate',
+        populate:
+        { 
+          path: 'assignmentAnswers',
+          select: '_id student answerFile mark markDescription checked'
+        }
+      }
+    );
   
     if (!subjects) {
       return next(new ErrorResponse('There is no subjects on Db !', 400));

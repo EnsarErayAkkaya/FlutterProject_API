@@ -10,7 +10,8 @@ const {
     createAssignmentAnswer,
     updateAssignmentAnswer,
     deleteAssignmentAnswer,
-    checkAssignmentAnswer
+    checkAssignmentAnswer,
+    downloadAssignmentAnswer
 } = require('../controllers/assignmentAnswers');
 
 const router = express.Router();
@@ -40,5 +41,6 @@ router.put('/checkAssignmentAnswer/:id', checkAssignmentAnswer);
 router.delete('/:id', deleteAssignmentAnswer);
 router.get('/:id', getAssignmentAnswer);
 router.get(getAssignmentAnswers);
+router.get('/download/:filename', downloadAssignmentAnswer);
 
 module.exports = router;

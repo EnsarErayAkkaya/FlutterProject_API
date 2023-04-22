@@ -4,7 +4,8 @@ const errorHandler = require('./middleware/error');
 const {
   connectDB
 } = require('./config/db');
-const bodyParser = require('body-parser');
+//const bodyParser = require('body-parser');
+//const cors = require("cors");
 
 // Load env vars
 dotenv.config({ path: './config/config.env' });
@@ -26,7 +27,11 @@ const assignmentAnswer = require('./routes/assignmentAnswer');
 const app = express();
 
 // Body parser
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({
+  extended: true
+}));
+//app.use(cors());
 
 // Mount routers here !!!
 //app.use('/api/v1/TEST', TEST);
